@@ -1,6 +1,8 @@
 package net.lastrik.botTest;
 
-import java.awt.Color;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import net.dv8tion.jda.JDA;
 import net.dv8tion.jda.JDABuilder;
@@ -16,8 +18,6 @@ import net.dv8tion.jda.managers.ChannelManager;
 
 import javax.security.auth.login.LoginException;
 import java.util.*;
-import java.util.regex.Pattern;
-import net.dv8tion.jda.managers.RoleManager;
 
 /**
  *
@@ -32,6 +32,7 @@ public class Bot implements EventListener {
     private JDA jda;
     private boolean stop = false;
     private ArrayList<Votation> votations;
+    private HashMap<String, ArrayList<String>> config;
 
     public Bot(String token) {
         try {
@@ -76,18 +77,21 @@ public class Bot implements EventListener {
                 String commandNoArgs = splittedCommand.get(0).replaceFirst(tokenCommand, "");
                 splittedCommand.remove(0);
                 ArrayList<String> args = splittedCommand;
-
-                switch (commandNoArgs) {
-                    //Quelques commandes qui touchent directement au bot
-                    case "stop":
-                        stop();
-                        break;
-                    case "changetoken":
-                        changeToken(e, args);
-                        break;
-                    default:
-                        Command command = new Command(e, commandNoArgs, args);
-                        command.process();
+                if (authorized(e, commandNoArgs)) {
+                    switch (commandNoArgs) {
+                        //Quelques commandes qui touchent directement au bot
+                        case "stop":
+                            stop();
+                            break;
+                        case "changetoken":
+                            changeToken(e, args);
+                            break;
+                        case "save":
+                            save();
+                        default:
+                            Command command = new Command(config, e, commandNoArgs, args);
+                            command.process();
+                    }
                 }
             }
         }
@@ -100,7 +104,7 @@ public class Bot implements EventListener {
     }
 
     private void changeToken(MessageReceivedEvent e, ArrayList<String> args) {
-        Command command = new Command(e, "changetoken", args);
+        Command command = new Command(config, e, "changetoken", args);
         tokenCommand = command.changeToken();
     }
 
@@ -109,13 +113,13 @@ public class Bot implements EventListener {
     }
 
     private void stop() {
+        save();
         democracy.getGuild().getPublicChannel().sendMessage("goodbye");
         jda.shutdown(true);
         stop = true;
         System.exit(0);
     }
-    
-    
+
 //J'ai pas touché à ces trucs, tu en fait ce que tu veux
     public void startVotation(String name) {
         Votation vote = new Votation(name, democracy);
@@ -142,4 +146,32 @@ public class Bot implements EventListener {
         return result;
     }
 
+    public void save() {
+        try {
+            FileOutputStream fos = new FileOutputStream("save.ser");
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(config);
+            oos.close();
+            fos.close();
+            democracy.getGuild().getPublicChannel().sendMessage("Config saved");
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+    }
+
+    private boolean authorized(MessageReceivedEvent e, String commandNoArgs) {
+        boolean res = false;
+        if(config.containsKey(commandNoArgs)){
+            ArrayList<Role> roles = new ArrayList<>(democracy.getGuild().getRolesForUser(e.getAuthor()));
+            for (Role role : roles) {
+                if(config.containsKey(role.getId())){
+                    res = true;
+                    break;
+                }
+            }
+        }else{
+            res = true;
+        }
+        return res;
+    }
 }
