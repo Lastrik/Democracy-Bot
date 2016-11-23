@@ -187,7 +187,7 @@ public class Command {
         for (Role role : roles) {
             rolesString.add(role.getId());
         }
-        if(config.containsKey(command)){
+        if(config.containsKey(args.get(0))){
             config.get(command).addAll(rolesString);
         }
     }
