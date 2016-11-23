@@ -142,7 +142,7 @@ public class Command {
 
     private void deleteRole() {
         for (Role role : roles) {
-            say("The role" + role.getAsMention() + " has been deleted");
+            say("The role " + role.getAsMention() + " has been deleted");
             role.getManager().delete();
         }
         democracy.update();
