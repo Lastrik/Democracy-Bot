@@ -1,7 +1,9 @@
 package net.lastrik.botTest;
 
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import net.dv8tion.jda.JDA;
@@ -18,6 +20,7 @@ import net.dv8tion.jda.managers.ChannelManager;
 
 import javax.security.auth.login.LoginException;
 import java.util.*;
+import static jdk.nashorn.internal.objects.NativeArray.map;
 
 /**
  *
@@ -48,6 +51,7 @@ public class Bot implements EventListener {
         int i;
         tokenCommand = "!";
         config = new HashMap<>();
+        charge();
         System.out.println("The bot is authorized on " + (i = jda.getGuilds().size()) + " server" + (i > 1 ? "s" : ""));
         if (jda.getGuilds().size() > 1) {
             System.err.println("This bot is not made to run on more than on server per . Please create multiple applications for multiple servers");
@@ -160,6 +164,33 @@ public class Bot implements EventListener {
             democracy.getGuild().getPublicChannel().sendMessage("Config saved");
         } catch (IOException ioe) {
             ioe.printStackTrace();
+        }
+    }
+
+    public void charge() {
+        try {
+            FileInputStream fis = new FileInputStream("save.ser");
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            config = (HashMap) ois.readObject();
+            ois.close();
+            fis.close();
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+            return;
+        } catch (ClassNotFoundException c) {
+            System.out.println("Class not found");
+            c.printStackTrace();
+            return;
+        }
+        System.out.println("Config charging...");
+        // Display content using Iterator
+        Set set = config.entrySet();
+        Iterator iterator = set.iterator();
+        while (iterator.hasNext()) {
+            Map.Entry mentry = (Map.Entry) iterator.next();
+            System.out.println("key: " + mentry.getKey() + " & Value: ");
+            System.out.println(mentry.getValue());
+
         }
     }
 
