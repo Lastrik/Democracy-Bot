@@ -135,7 +135,6 @@ public class Command {
         manager.setName(name);
         manager.setMentionable(true);
         manager.setGrouped(true);
-        manager.setColor(Color.yellow);
         manager.update();
         democracy.update();
         say("The role " + manager.getRole().getAsMention() + " has been created");
