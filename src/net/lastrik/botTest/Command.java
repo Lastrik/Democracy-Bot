@@ -123,8 +123,15 @@ public class Command {
 
     private void createRole() {
         RoleManager manager = democracy.getGuild().createRole();
-        manager.setName(argsAsString());
+        
+         Pattern p = Pattern.compile("[^a-fA-F0-9]");
+         for (String arg : args) {
+            if(p.matcher(arg).find()){
+                
+            }
+        }
         manager.setMentionable(true);
+        manager.setGrouped(true);
         manager.setColor(Color.yellow);
         manager.update();
         democracy.update();
