@@ -2,6 +2,7 @@ package net.lastrik.botTest;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.regex.Pattern;
 import net.dv8tion.jda.entities.Role;
 import net.dv8tion.jda.entities.User;
@@ -15,6 +16,7 @@ import net.dv8tion.jda.managers.RoleManager;
  */
 public class Command {
 
+    private HashMap<String, ArrayList<String>> config;
     private MessageReceivedEvent e;
     private String command;
     private ArrayList<String> args;
@@ -23,7 +25,8 @@ public class Command {
     private ArrayList<Role> roles;
     private User author;
 
-    public Command(MessageReceivedEvent e, String command, ArrayList<String> args) {
+    public Command(HashMap<String, ArrayList<String>> config, MessageReceivedEvent e, String command, ArrayList<String> args) {
+        this.config = config;
         this.e = e;
         this.command = command;
         this.args = args;
@@ -58,6 +61,9 @@ public class Command {
                 break;
             case "unban":
                 unban();
+                break;
+            case "authorize":
+                authorize();
                 break;
             default:
                 say("You can only do these commands :");
@@ -174,5 +180,15 @@ public class Command {
 
     private void listCommands() {
         say("The commands list is not available yet");
+    }
+
+    private void authorize() {
+        ArrayList<String> rolesString = new ArrayList<>();
+        for (Role role : roles) {
+            rolesString.add(role.getId());
+        }
+        if(config.containsKey(command)){
+            config.get(command).addAll(rolesString);
+        }
     }
 }
