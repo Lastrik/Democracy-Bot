@@ -89,10 +89,13 @@ public class Bot implements EventListener {
                             break;
                         case "save":
                             save();
+                            break;
                         default:
                             Command command = new Command(config, e, commandNoArgs, args);
                             command.process();
                     }
+                } else {
+                    e.getChannel().sendMessage("you're not authorized to do this command");
                 }
             }
         }
@@ -162,15 +165,15 @@ public class Bot implements EventListener {
 
     private boolean authorized(MessageReceivedEvent e, String commandNoArgs) {
         boolean res = false;
-        if(config.containsKey(commandNoArgs)){
+        if (config.containsKey(commandNoArgs)) {
             ArrayList<Role> roles = new ArrayList<>(democracy.getGuild().getRolesForUser(e.getAuthor()));
             for (Role role : roles) {
-                if(config.containsKey(role.getId())){
+                if (config.get(commandNoArgs).contains(role.getId())) {
                     res = true;
                     break;
                 }
             }
-        }else{
+        } else {
             res = true;
         }
         return res;
