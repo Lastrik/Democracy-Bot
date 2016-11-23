@@ -47,6 +47,7 @@ public class Bot implements EventListener {
         System.out.println("Connected with: " + jda.getSelfInfo().getUsername());
         int i;
         tokenCommand = "!";
+        config = new HashMap<>();
         System.out.println("The bot is authorized on " + (i = jda.getGuilds().size()) + " server" + (i > 1 ? "s" : ""));
         if (jda.getGuilds().size() > 1) {
             System.err.println("This bot is not made to run on more than on server per . Please create multiple applications for multiple servers");
