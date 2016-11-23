@@ -1,2 +1,2 @@
 # Democracy-Bot
-Democracy-Bot for discord
+The git repo for democracy-bot discord bot.
