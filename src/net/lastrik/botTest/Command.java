@@ -186,9 +186,9 @@ public class Command {
         ArrayList<String> rolesString = new ArrayList<>();
         for (Role role : roles) {
             rolesString.add(role.getId());
-            say(role.getAsMention() + " are now authorized to do the \""+args.get(0)+"\" command");
+            say(role.getAsMention() + " are now authorized to do the \"" + args.get(0) + "\" command");
         }
-        if(config.containsKey(args.get(0))){
+        if (config.containsKey(args.get(0))) {
             config.get(args.get(0)).addAll(rolesString);
         } else {
             config.put(args.get(0), rolesString);
