@@ -53,8 +53,15 @@ public class Command {
             case "deleterole":
                 deleteRole();
                 break;
+            case "ban":
+                ban();
+                break;
+            case "unban":
+                unban();
+                break;
             default:
-                specialsCommands();
+                say("You can only do these commands :");
+                listCommands();
         }
 
     }
@@ -167,29 +174,5 @@ public class Command {
 
     private void listCommands() {
         say("The commands list is not available yet");
-    }
-
-    private void listJudgeCommands() {
-        say("The Judge commands list is not available yet");
-    }
-
-    private void specialsCommands() {
-        if (verifieRole(author, "Judge")) {
-            switch (command) {
-                case "ban":
-                    ban();
-                    break;
-                case "unban":
-                    unban();
-                    break;
-                default:
-                    say("You can only do these commands :");
-                    listCommands();
-                    listJudgeCommands();
-            }
-        } else {
-            say("You can only do these commands :");
-            listCommands();
-        }
     }
 }
