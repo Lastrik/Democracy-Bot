@@ -11,7 +11,7 @@ import net.dv8tion.jda.managers.RoleManager;
 
 /**
  *
- * @author Jordan 
+ * @author Jordan
  */
 public class Command {
 
@@ -123,13 +123,16 @@ public class Command {
 
     private void createRole() {
         RoleManager manager = democracy.getGuild().createRole();
-        
-         Pattern p = Pattern.compile("[^a-fA-F0-9]");
-         for (String arg : args) {
-            if(p.matcher(arg).find()){
-                
+        String name = argsAsString();
+        Pattern p = Pattern.compile("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$");
+        for (String arg : args) {
+            if (p.matcher(arg).matches()) {
+                manager.setColor(Color.decode(arg));
+                name = name.replace(arg, "");
+                break;
             }
         }
+        manager.setName(name);
         manager.setMentionable(true);
         manager.setGrouped(true);
         manager.setColor(Color.yellow);
