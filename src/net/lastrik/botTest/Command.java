@@ -65,6 +65,9 @@ public class Command {
             case "authorize":
                 authorize();
                 break;
+            case "unauthorize":
+                unauthorize();
+                break;
             case "shconfig":
                 shconfig();
                 break;
@@ -195,6 +198,19 @@ public class Command {
             config.get(args.get(0)).addAll(rolesString);
         } else {
             config.put(args.get(0), rolesString);
+        }
+    }
+    
+    private void unauthorize() {
+        if (config.containsKey(args.get(0))) {
+        for (Role role : roles) {
+            if(config.get(args.get(0)).contains(role.getId())){
+                say(role.getAsMention() + " are no longer authorized to do the \"" + args.get(0) + "\" command");
+                config.get(args.get(0)).remove(role.getId());
+            }
+        }
+        } else {
+            say("There is no authorization for this command");
         }
     }
 
