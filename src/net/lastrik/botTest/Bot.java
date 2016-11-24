@@ -69,9 +69,14 @@ public class Bot implements EventListener {
     @Override
     public void onEvent(Event event) {
         if (event instanceof PrivateMessageReceivedEvent) {
-            if (((PrivateMessageReceivedEvent) event).getMessage().getContent().equalsIgnoreCase("ping")) {
-                ((PrivateMessageReceivedEvent) event).getChannel().sendTyping();
-                ((PrivateMessageReceivedEvent) event).getChannel().sendMessage("pong");
+            PrivateMessageReceivedEvent p = (PrivateMessageReceivedEvent) event;
+            if (p.getMessage().getContent().startsWith(tokenCommand)) {
+                ArrayList<String> splittedCommand = splitter(p.getMessage().getContent());
+                String commandNoArgs = splittedCommand.get(0).replaceFirst(tokenCommand, "");
+                splittedCommand.remove(0);
+                ArrayList<String> args = splittedCommand;
+                MpCommand mpCommand = new MpCommand(democracy, p, commandNoArgs, args);
+                mpCommand.process();
             }
         }
 
