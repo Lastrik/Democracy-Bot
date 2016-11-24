@@ -44,6 +44,9 @@ public class Command {
             case "newtextchannel":
                 newTextChannel();
                 break;
+            case "newvoicechannel":
+                newVoiceChannel();
+                break;
             case "role":
                 role();
                 break;
@@ -200,15 +203,15 @@ public class Command {
             config.put(args.get(0), rolesString);
         }
     }
-    
+
     private void unauthorize() {
         if (config.containsKey(args.get(0))) {
-        for (Role role : roles) {
-            if(config.get(args.get(0)).contains(role.getId())){
-                say(role.getAsMention() + " are no longer authorized to do the \"" + args.get(0) + "\" command");
-                config.get(args.get(0)).remove(role.getId());
+            for (Role role : roles) {
+                if (config.get(args.get(0)).contains(role.getId())) {
+                    say(role.getAsMention() + " are no longer authorized to do the \"" + args.get(0) + "\" command");
+                    config.get(args.get(0)).remove(role.getId());
+                }
             }
-        }
         } else {
             say("There is no authorization for this command");
         }
@@ -217,11 +220,23 @@ public class Command {
     private void shconfig() {
         String configString = "Config : \n";
         for (String commandStr : config.keySet()) {
-            configString += "\n\nThe \""+commandStr+"\" command can be done by :\n";
+            configString += "\n\nThe \"" + commandStr + "\" command can be done by :\n";
             for (String roleID : config.get(commandStr)) {
-                configString += " | "+democracy.getGuild().getRoleById(roleID).getAsMention()+" | ";
+                configString += " | " + democracy.getGuild().getRoleById(roleID).getAsMention() + " | ";
             }
         }
         say(configString);
+    }
+
+    private void newVoiceChannel() {
+        String channelName = argsAsString();
+        Pattern p = Pattern.compile("[^-a-zA-Z0-9_ ]");
+        boolean hasSpecialChar = p.matcher(channelName).find();
+        if (!hasSpecialChar) {
+            democracy.getGuild().createVoiceChannel(channelName);
+            say("The voice channel " + channelName + " has been created");
+        } else {
+            say("Your name cannot contain non-aplhanumerical characacters.");
+        }
     }
 }
