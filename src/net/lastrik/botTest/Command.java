@@ -65,6 +65,9 @@ public class Command {
             case "authorize":
                 authorize();
                 break;
+            case "shconfig":
+                shconfig();
+                break;
             default:
                 say("You can only do these commands :");
                 listCommands();
@@ -193,5 +196,16 @@ public class Command {
         } else {
             config.put(args.get(0), rolesString);
         }
+    }
+
+    private void shconfig() {
+        String configString = "Config : \n";
+        for (String commandStr : config.keySet()) {
+            configString += "\n\nThe \""+commandStr+"\" command can be done by :\n";
+            for (String roleID : config.get(commandStr)) {
+                configString += " | "+democracy.getGuild().getRoleById(roleID).getAsMention()+" | ";
+            }
+        }
+        say(configString);
     }
 }
