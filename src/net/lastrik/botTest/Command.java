@@ -2,6 +2,7 @@ package net.lastrik.botTest;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.regex.Pattern;
 import net.dv8tion.jda.entities.Role;
 import net.dv8tion.jda.entities.User;
@@ -11,10 +12,11 @@ import net.dv8tion.jda.managers.RoleManager;
 
 /**
  *
- * @author Jordan 
+ * @author Jordan
  */
 public class Command {
 
+    private HashMap<String, ArrayList<String>> config;
     private MessageReceivedEvent e;
     private String command;
     private ArrayList<String> args;
@@ -23,7 +25,8 @@ public class Command {
     private ArrayList<Role> roles;
     private User author;
 
-    public Command(MessageReceivedEvent e, String command, ArrayList<String> args) {
+    public Command(HashMap<String, ArrayList<String>> config, MessageReceivedEvent e, String command, ArrayList<String> args) {
+        this.config = config;
         this.e = e;
         this.command = command;
         this.args = args;
@@ -53,8 +56,24 @@ public class Command {
             case "deleterole":
                 deleteRole();
                 break;
+            case "ban":
+                ban();
+                break;
+            case "unban":
+                unban();
+                break;
+            case "authorize":
+                authorize();
+                break;
+            case "unauthorize":
+                unauthorize();
+                break;
+            case "shconfig":
+                shconfig();
+                break;
             default:
-                specialsCommands();
+                say("You can only do these commands :");
+                listCommands();
         }
 
     }
@@ -123,9 +142,18 @@ public class Command {
 
     private void createRole() {
         RoleManager manager = democracy.getGuild().createRole();
-        manager.setName(argsAsString());
+        String name = argsAsString();
+        Pattern p = Pattern.compile("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$");
+        for (String arg : args) {
+            if (p.matcher(arg).matches()) {
+                manager.setColor(Color.decode(arg));
+                name = name.replace(arg, "");
+                break;
+            }
+        }
+        manager.setName(name);
         manager.setMentionable(true);
-        manager.setColor(Color.yellow);
+        manager.setGrouped(true);
         manager.update();
         democracy.update();
         say("The role " + manager.getRole().getAsMention() + " has been created");
@@ -133,7 +161,7 @@ public class Command {
 
     private void deleteRole() {
         for (Role role : roles) {
-            say("The role" + role.getAsMention() + " has been deleted");
+            say("The role " + role.getAsMention() + " has been deleted");
             role.getManager().delete();
         }
         democracy.update();
@@ -160,27 +188,40 @@ public class Command {
         say("The commands list is not available yet");
     }
 
-    private void listJudgeCommands() {
-        say("The Judge commands list is not available yet");
+    private void authorize() {
+        ArrayList<String> rolesString = new ArrayList<>();
+        for (Role role : roles) {
+            rolesString.add(role.getId());
+            say(role.getAsMention() + " are now authorized to do the \"" + args.get(0) + "\" command");
+        }
+        if (config.containsKey(args.get(0))) {
+            config.get(args.get(0)).addAll(rolesString);
+        } else {
+            config.put(args.get(0), rolesString);
+        }
+    }
+    
+    private void unauthorize() {
+        if (config.containsKey(args.get(0))) {
+        for (Role role : roles) {
+            if(config.get(args.get(0)).contains(role.getId())){
+                say(role.getAsMention() + " are no longer authorized to do the \"" + args.get(0) + "\" command");
+                config.get(args.get(0)).remove(role.getId());
+            }
+        }
+        } else {
+            say("There is no authorization for this command");
+        }
     }
 
-    private void specialsCommands() {
-        if (verifieRole(author, "Judge")) {
-            switch (command) {
-                case "ban":
-                    ban();
-                    break;
-                case "unban":
-                    unban();
-                    break;
-                default:
-                    say("You can only do these commands :");
-                    listCommands();
-                    listJudgeCommands();
+    private void shconfig() {
+        String configString = "Config : \n";
+        for (String commandStr : config.keySet()) {
+            configString += "\n\nThe \""+commandStr+"\" command can be done by :\n";
+            for (String roleID : config.get(commandStr)) {
+                configString += " | "+democracy.getGuild().getRoleById(roleID).getAsMention()+" | ";
             }
-        } else {
-            say("You can only do these commands :");
-            listCommands();
         }
+        say(configString);
     }
 }
