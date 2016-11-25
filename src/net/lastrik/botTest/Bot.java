@@ -35,7 +35,7 @@ public class Bot implements EventListener {
     private JDA jda;
     private boolean stop = false;
     private ArrayList<Votation> votations;
-    private HashMap<String, ArrayList<String>> config;
+    private Config config;
 
     public Bot(String token) {
         try {
@@ -50,7 +50,7 @@ public class Bot implements EventListener {
         System.out.println("Connected with: " + jda.getSelfInfo().getUsername());
         int i;
         tokenCommand = "!";
-        config = new HashMap<>();
+        config = new Config();
         charge();
         System.out.println("The bot is authorized on " + (i = jda.getGuilds().size()) + " server" + (i > 1 ? "s" : ""));
         if (jda.getGuilds().size() > 1) {
@@ -176,7 +176,7 @@ public class Bot implements EventListener {
         try {
             FileInputStream fis = new FileInputStream("save.ser");
             ObjectInputStream ois = new ObjectInputStream(fis);
-            config = (HashMap) ois.readObject();
+            config = (Config) ois.readObject();
             ois.close();
             fis.close();
         } catch (IOException ioe) {
@@ -187,24 +187,14 @@ public class Bot implements EventListener {
             c.printStackTrace();
             return;
         }
-        System.out.println("Config charging...");
-        // Display content using Iterator
-        Set set = config.entrySet();
-        Iterator iterator = set.iterator();
-        while (iterator.hasNext()) {
-            Map.Entry mentry = (Map.Entry) iterator.next();
-            System.out.println("key: " + mentry.getKey() + " & Value: ");
-            System.out.println(mentry.getValue());
-
-        }
     }
 
     private boolean authorized(MessageReceivedEvent e, String commandNoArgs) {
         boolean res = false;
-        if (config.containsKey(commandNoArgs)) {
+        if (config.getAuthorization().containsKey(commandNoArgs)) {
             ArrayList<Role> roles = new ArrayList<>(democracy.getGuild().getRolesForUser(e.getAuthor()));
             for (Role role : roles) {
-                if (config.get(commandNoArgs).contains(role.getId())) {
+                if (config.getAuthorization().get(commandNoArgs).contains(role.getId())) {
                     res = true;
                     break;
                 }
