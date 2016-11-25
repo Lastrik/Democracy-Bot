@@ -82,7 +82,9 @@ public class Command {
     }
 
     private void say(String sentence) {
+        if(!("".equals(sentence))){
         e.getChannel().sendMessage(sentence);
+        }
     }
 
     private void ban() {
@@ -199,6 +201,10 @@ public class Command {
         }
         if (config.getAuthorization().containsKey(args.get(0))) {
             config.getAuthorization().get(args.get(0)).addAll(rolesString);
+            if(args.contains("@everyone")){
+                config.getAuthorization().remove(args.get(0));
+                say("@everyone is now authorized to do the \"" + args.get(0) + "\" command");
+            }
         } else {
             config.getAuthorization().put(args.get(0), rolesString);
         }
