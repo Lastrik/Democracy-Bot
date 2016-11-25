@@ -16,7 +16,7 @@ import net.dv8tion.jda.managers.RoleManager;
  */
 public class Command {
 
-    private HashMap<String, ArrayList<String>> config;
+    private Config config;
     private MessageReceivedEvent e;
     private String command;
     private ArrayList<String> args;
@@ -25,7 +25,7 @@ public class Command {
     private ArrayList<Role> roles;
     private User author;
 
-    public Command(HashMap<String, ArrayList<String>> config, MessageReceivedEvent e, String command, ArrayList<String> args) {
+    public Command(Config config, MessageReceivedEvent e, String command, ArrayList<String> args) {
         this.config = config;
         this.e = e;
         this.command = command;
@@ -43,6 +43,9 @@ public class Command {
                 break;
             case "newtextchannel":
                 newTextChannel();
+                break;
+            case "newvoicechannel":
+                newVoiceChannel();
                 break;
             case "role":
                 role();
@@ -79,7 +82,9 @@ public class Command {
     }
 
     private void say(String sentence) {
+        if(!("".equals(sentence))){
         e.getChannel().sendMessage(sentence);
+        }
     }
 
     private void ban() {
@@ -194,21 +199,25 @@ public class Command {
             rolesString.add(role.getId());
             say(role.getAsMention() + " are now authorized to do the \"" + args.get(0) + "\" command");
         }
-        if (config.containsKey(args.get(0))) {
-            config.get(args.get(0)).addAll(rolesString);
+        if (config.getAuthorization().containsKey(args.get(0))) {
+            config.getAuthorization().get(args.get(0)).addAll(rolesString);
+            if(args.contains("@everyone")){
+                config.getAuthorization().remove(args.get(0));
+                say("@everyone is now authorized to do the \"" + args.get(0) + "\" command");
+            }
         } else {
-            config.put(args.get(0), rolesString);
+            config.getAuthorization().put(args.get(0), rolesString);
         }
     }
-    
+
     private void unauthorize() {
-        if (config.containsKey(args.get(0))) {
-        for (Role role : roles) {
-            if(config.get(args.get(0)).contains(role.getId())){
-                say(role.getAsMention() + " are no longer authorized to do the \"" + args.get(0) + "\" command");
-                config.get(args.get(0)).remove(role.getId());
+        if (config.getAuthorization().containsKey(args.get(0))) {
+            for (Role role : roles) {
+                if (config.getAuthorization().get(args.get(0)).contains(role.getId())) {
+                    say(role.getAsMention() + " are no longer authorized to do the \"" + args.get(0) + "\" command");
+                    config.getAuthorization().get(args.get(0)).remove(role.getId());
+                }
             }
-        }
         } else {
             say("There is no authorization for this command");
         }
@@ -216,12 +225,24 @@ public class Command {
 
     private void shconfig() {
         String configString = "Config : \n";
-        for (String commandStr : config.keySet()) {
-            configString += "\n\nThe \""+commandStr+"\" command can be done by :\n";
-            for (String roleID : config.get(commandStr)) {
-                configString += " | "+democracy.getGuild().getRoleById(roleID).getAsMention()+" | ";
+        for (String commandStr : config.getAuthorization().keySet()) {
+            configString += "\n\nThe \"" + commandStr + "\" command can be done by :\n";
+            for (String roleID : config.getAuthorization().get(commandStr)) {
+                configString += " | " + democracy.getGuild().getRoleById(roleID).getAsMention() + " | ";
             }
         }
         say(configString);
+    }
+
+    private void newVoiceChannel() {
+        String channelName = argsAsString();
+        Pattern p = Pattern.compile("[^-a-zA-Z0-9_ ]");
+        boolean hasSpecialChar = p.matcher(channelName).find();
+        if (!hasSpecialChar) {
+            democracy.getGuild().createVoiceChannel(channelName);
+            say("The voice channel " + channelName + " has been created");
+        } else {
+            say("Your name cannot contain non-aplhanumerical characacters.");
+        }
     }
 }
