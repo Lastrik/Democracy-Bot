@@ -24,17 +24,22 @@ class MpCommand {
     private ArrayList<String> args;
     private ArrayList<User> users;
     private User author;
+    private Config config;
 
-    public MpCommand(GuildManager democracy, PrivateMessageReceivedEvent p, String command, ArrayList<String> args) {
+    public MpCommand(GuildManager democracy, PrivateMessageReceivedEvent p, String command, ArrayList<String> args, Config config) {
         this.democracy = democracy;
         this.p = p;
         this.command = command;
         this.args = args;
         this.users = new ArrayList<>(p.getMessage().getMentionedUsers());
         this.author = p.getAuthor();
+        this.config = config;
     }
 
     public void process() {
+        if(config.getReferendums().containsKey(author.getId())){
+            config.getReferendums().get(author.getId()).refCommand(command, args);
+        }else {
         switch (command) {
             case "ping":
                 sayMP("pong");
@@ -47,13 +52,15 @@ class MpCommand {
                 listCommands();
         }
     }
+    }
 
     private void sayMP(String sentence) {
         author.getPrivateChannel().sendMessage(sentence);
     }
 
     private void referendum() {
-        Referendum referendum = new Referendum(p, democracy);
+        Referendum referendum = new Referendum(config, p, democracy);
+        config.getReferendums().put(author.getId(), referendum);
         referendum.process();
     }
 

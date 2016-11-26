@@ -15,10 +15,12 @@ import java.util.HashMap;
  */
 public class Config implements Serializable{
     
-    HashMap<String, ArrayList<String>> authorization ;
+   private HashMap<String, ArrayList<String>> authorization ;
+   private HashMap<String, Referendum> referendums;
 
     public Config() {
         this.authorization = new HashMap<>();
+        this.referendums = new HashMap<>();
     }
 
     public HashMap<String, ArrayList<String>> getAuthorization() {
@@ -28,5 +30,8 @@ public class Config implements Serializable{
     public void setAuthorization(HashMap<String, ArrayList<String>> authorization) {
         this.authorization = authorization;
     }
-    
+
+    public HashMap<String, Referendum> getReferendums() {
+        return referendums;
+    }
 }
