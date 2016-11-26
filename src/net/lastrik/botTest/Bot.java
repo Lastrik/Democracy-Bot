@@ -175,12 +175,13 @@ public class Bot implements EventListener {
 
     public void charge() {
         try {
+            System.out.println("Charging save file");
             FileInputStream fis = new FileInputStream("save.ser");
-            ObjectInputStream ois = new ObjectInputStream(fis);
-            
+            ObjectInputStream ois = new ObjectInputStream(fis);            
             config = (Config) ois.readObject();
             ois.close();
             fis.close();
+             System.out.println("Save file charged");
         } catch (IOException ioe) {
             System.out.println("No save file found");
             return;
