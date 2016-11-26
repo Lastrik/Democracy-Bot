@@ -3,10 +3,14 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Jordan/Documents/NetBeansProjects/GithubTest/Democracy-Bot/src/net/lastrik/botTest/Votation.java</file>
-            <file>file:/C:/Users/Jordan/Documents/NetBeansProjects/GithubTest/Democracy-Bot/src/net/lastrik/botTest/Main.java</file>
-            <file>file:/C:/Users/Jordan/Documents/NetBeansProjects/GithubTest/Democracy-Bot/src/net/lastrik/botTest/Bot.java</file>
-            <file>file:/C:/Users/Jordan/Documents/NetBeansProjects/GithubTest/Democracy-Bot/src/net/lastrik/botTest/Command.java</file>
+            <file>file:/C:/Users/Jordan/Documents/NetBeansProjects/Democracy-Bot/src/net/lastrik/botTest/Config.java</file>
+            <file>file:/C:/Users/Jordan/Documents/NetBeansProjects/Democracy-Bot/src/net/lastrik/botTest/Util.java</file>
+            <file>file:/C:/Users/Jordan/Documents/NetBeansProjects/Democracy-Bot/src/net/lastrik/botTest/Bot.java</file>
+            <file>file:/C:/Users/Jordan/Documents/NetBeansProjects/Democracy-Bot/src/net/lastrik/botTest/Command.java</file>
+            <file>file:/C:/Users/Jordan/Documents/NetBeansProjects/Democracy-Bot/src/net/lastrik/botTest/Votation.java</file>
+            <file>file:/C:/Users/Jordan/Documents/NetBeansProjects/Democracy-Bot/src/net/lastrik/botTest/Main.java</file>
+            <file>file:/C:/Users/Jordan/Documents/NetBeansProjects/Democracy-Bot/src/net/lastrik/botTest/MpCommand.java</file>
+            <file>file:/C:/Users/Jordan/Documents/NetBeansProjects/Democracy-Bot/src/net/lastrik/botTest/Referendum.java</file>
         </group>
     </open-files>
 </project-private>
