@@ -184,7 +184,7 @@ public class Bot implements EventListener {
             System.out.println("Charging save file");
             FileInputStream fis = new FileInputStream(savePath);
             ObjectInputStream ois = new ObjectInputStream(fis);
-            config = (Config) ois.readObject();
+            config =  (Config) ois.readObject();
             ois.close();
             fis.close();
             System.out.println("Save file loaded");
