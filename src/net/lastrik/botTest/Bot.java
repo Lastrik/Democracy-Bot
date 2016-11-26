@@ -1,6 +1,7 @@
 package net.lastrik.botTest;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -176,11 +177,12 @@ public class Bot implements EventListener {
         try {
             FileInputStream fis = new FileInputStream("save.ser");
             ObjectInputStream ois = new ObjectInputStream(fis);
+            
             config = (Config) ois.readObject();
             ois.close();
             fis.close();
         } catch (IOException ioe) {
-            ioe.printStackTrace();
+            System.out.println("No save file found");
             return;
         } catch (ClassNotFoundException c) {
             System.out.println("Class not found");
