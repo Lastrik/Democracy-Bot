@@ -176,7 +176,7 @@ public class Bot implements EventListener {
         try {
             FileInputStream fis = new FileInputStream("save.ser");
             ObjectInputStream ois = new ObjectInputStream(fis);
-            config = (Config) ois.readObject();
+            config =  (Config) ois.readObject();
             ois.close();
             fis.close();
         } catch (IOException ioe) {
