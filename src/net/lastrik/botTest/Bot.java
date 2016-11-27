@@ -1,5 +1,6 @@
 package net.lastrik.botTest;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -20,7 +21,6 @@ import net.dv8tion.jda.managers.ChannelManager;
 
 import javax.security.auth.login.LoginException;
 import java.util.*;
-import static jdk.nashorn.internal.objects.NativeArray.map;
 
 /**
  *
@@ -30,12 +30,13 @@ public class Bot implements EventListener {
 
     public final static int DAYS_TO_VOTE = 2;
 
+    private String savePath;
     private String tokenCommand;
     private GuildManager democracy;
     private JDA jda;
     private boolean stop = false;
     private ArrayList<Votation> votations;
-    private HashMap<String, ArrayList<String>> config;
+    private Config config;
 
     public Bot(String token) {
         try {
@@ -46,12 +47,13 @@ public class Bot implements EventListener {
             System.out.println("Un error append please check your internet connection and the bot token");
             return;
         }
+        savePath = "save.ser";
         democracy = new GuildManager(jda.getGuilds().get(0));
         System.out.println("Connected with: " + jda.getSelfInfo().getUsername());
         int i;
         tokenCommand = "!";
-        config = new HashMap<>();
-        charge();
+        config = new Config();
+        load();
         System.out.println("The bot is authorized on " + (i = jda.getGuilds().size()) + " server" + (i > 1 ? "s" : ""));
         if (jda.getGuilds().size() > 1) {
             System.err.println("This bot is not made to run on more than on server per . Please create multiple applications for multiple servers");
@@ -69,9 +71,14 @@ public class Bot implements EventListener {
     @Override
     public void onEvent(Event event) {
         if (event instanceof PrivateMessageReceivedEvent) {
-            if (((PrivateMessageReceivedEvent) event).getMessage().getContent().equalsIgnoreCase("ping")) {
-                ((PrivateMessageReceivedEvent) event).getChannel().sendTyping();
-                ((PrivateMessageReceivedEvent) event).getChannel().sendMessage("pong");
+            PrivateMessageReceivedEvent p = (PrivateMessageReceivedEvent) event;
+            if (p.getMessage().getContent().startsWith(tokenCommand)) {
+                ArrayList<String> splittedCommand = splitter(p.getMessage().getContent());
+                String commandNoArgs = splittedCommand.get(0).replaceFirst(tokenCommand, "");
+                splittedCommand.remove(0);
+                ArrayList<String> args = splittedCommand;
+                MpCommand mpCommand = new MpCommand(democracy, p, commandNoArgs, args, config);
+                mpCommand.process();
             }
         }
 
@@ -82,24 +89,29 @@ public class Bot implements EventListener {
                 String commandNoArgs = splittedCommand.get(0).replaceFirst(tokenCommand, "");
                 splittedCommand.remove(0);
                 ArrayList<String> args = splittedCommand;
-                if (authorized(e, commandNoArgs)) {
-                    switch (commandNoArgs) {
-                        //Quelques commandes qui touchent directement au bot
-                        case "stop":
-                            stop();
-                            break;
-                        case "changetoken":
-                            changeToken(e, args);
-                            break;
-                        case "save":
-                            save();
-                            break;
-                        default:
-                            Command command = new Command(config, e, commandNoArgs, args);
-                            command.process();
+                if (!e.getAuthor().isBot()) {
+                    if (authorized(e, commandNoArgs)) {
+                        switch (commandNoArgs) {
+                            //Quelques commandes qui touchent directement au bot
+                            case "stop":
+                                stop();
+                                break;
+                            case "changetoken":
+                                changeToken(e, args);
+                                break;
+                            case "save":
+                                save();
+                                break;
+                            case "reload":
+                                reload(e);
+                                break;
+                            default:
+                                Command command = new Command(config, e, commandNoArgs, args);
+                                command.process();
+                        }
+                    } else {
+                        e.getChannel().sendMessage("you're not authorized to do this command");
                     }
-                } else {
-                    e.getChannel().sendMessage("you're not authorized to do this command");
                 }
             }
         }
@@ -156,7 +168,7 @@ public class Bot implements EventListener {
 
     public void save() {
         try {
-            FileOutputStream fos = new FileOutputStream("save.ser");
+            FileOutputStream fos = new FileOutputStream(savePath);
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(config);
             oos.close();
@@ -167,39 +179,31 @@ public class Bot implements EventListener {
         }
     }
 
-    public void charge() {
+    public void load() {
         try {
-            FileInputStream fis = new FileInputStream("save.ser");
+            System.out.println("Charging save file");
+            FileInputStream fis = new FileInputStream(savePath);
             ObjectInputStream ois = new ObjectInputStream(fis);
-            config = (HashMap) ois.readObject();
+            config =  (Config) ois.readObject();
             ois.close();
             fis.close();
+            System.out.println("Save file loaded");
         } catch (IOException ioe) {
-            ioe.printStackTrace();
+            System.out.println("No save file found");
             return;
         } catch (ClassNotFoundException c) {
             System.out.println("Class not found");
             c.printStackTrace();
             return;
         }
-        System.out.println("Config charging...");
-        // Display content using Iterator
-        Set set = config.entrySet();
-        Iterator iterator = set.iterator();
-        while (iterator.hasNext()) {
-            Map.Entry mentry = (Map.Entry) iterator.next();
-            System.out.println("key: " + mentry.getKey() + " & Value: ");
-            System.out.println(mentry.getValue());
-
-        }
     }
 
     private boolean authorized(MessageReceivedEvent e, String commandNoArgs) {
         boolean res = false;
-        if (config.containsKey(commandNoArgs)) {
+        if (config.getAuthorization().containsKey(commandNoArgs)) {
             ArrayList<Role> roles = new ArrayList<>(democracy.getGuild().getRolesForUser(e.getAuthor()));
             for (Role role : roles) {
-                if (config.get(commandNoArgs).contains(role.getId())) {
+                if (config.getAuthorization().get(commandNoArgs).contains(role.getId())) {
                     res = true;
                     break;
                 }
@@ -208,5 +212,11 @@ public class Bot implements EventListener {
             res = true;
         }
         return res;
+    }
+
+    private void reload(MessageReceivedEvent e) {
+        config = new Config();
+        save();
+        e.getChannel().sendMessage("Config reloaded");
     }
 }
