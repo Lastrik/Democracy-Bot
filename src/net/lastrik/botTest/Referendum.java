@@ -100,10 +100,21 @@ public class Referendum {
     }
 
     private void initiate() {
-        String string = "New referendum created :\n";
+                Votation votation = new Votation(this, democracy);
+                config.getVotations().add(votation);
+        String string = "New referendum created on ID "+config.getVotations().indexOf(votation)+" :\n";
         for (Command command : commands) {
             string += "\n" + command.getCommand() + " " + command.getArgsString() + command.getRolesasMention() + " " + command.getUsersByMention();
         }
         sayGuild(string);
     }
+
+    public User getAuthor() {
+        return author;
+    }
+
+    public ArrayList<Command> getCommands() {
+        return commands;
+    }
+    
 }

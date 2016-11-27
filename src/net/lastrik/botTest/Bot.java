@@ -141,30 +141,30 @@ public class Bot implements EventListener {
     }
 
 //J'ai pas touché à ces trucs, tu en fait ce que tu veux
-    public void startVotation(String name) {
-        Votation vote = new Votation(name, democracy);
-        votations.add(vote);
-        TimerTask taskEndVote = new TimerTask() {
-            @Override
-            public void run() {
-                endVote(vote);
-            }
-        };
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(new Date());
-        cal.add(Calendar.DAY_OF_YEAR, DAYS_TO_VOTE);
-        Date time = cal.getTime();
-        Timer timerUntilEnd = new Timer();
-        timerUntilEnd.schedule(taskEndVote, time);
-    }
-
-    public boolean endVote(Votation votation) {
-        democracy.getGuild().getPublicChannel().sendMessage("The votation has ended.");
-        ChannelManager voteChan = votation.getChan();
-        boolean result = votation.getResult();
-        voteChan.delete();
-        return result;
-    }
+//    public void startVotation(String name) {
+//        Votation vote = new Votation(name, democracy);
+//        votations.add(vote);
+//        TimerTask taskEndVote = new TimerTask() {
+//            @Override
+//            public void run() {
+//                endVote(vote);
+//            }
+//        };
+//        Calendar cal = Calendar.getInstance();
+//        cal.setTime(new Date());
+//        cal.add(Calendar.DAY_OF_YEAR, DAYS_TO_VOTE);
+//        Date time = cal.getTime();
+//        Timer timerUntilEnd = new Timer();
+//        timerUntilEnd.schedule(taskEndVote, time);
+//    }
+//
+//    public boolean endVote(Votation votation) {
+//        democracy.getGuild().getPublicChannel().sendMessage("The votation has ended.");
+//        ChannelManager voteChan = votation.getChan();
+//        boolean result = votation.getResult();
+//        voteChan.delete();
+//        return result;
+//    }
 
     public void save() {
         try {

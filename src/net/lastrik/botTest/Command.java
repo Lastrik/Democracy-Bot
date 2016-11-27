@@ -35,8 +35,8 @@ public class Command {
         this.roles = new ArrayList<>(e.getMessage().getMentionedRoles());
         this.author = e.getAuthor();
     }
-    
-    public Command(GuildManager democracy, Config config, String command, ArrayList<String> args, ArrayList<String> usersID, ArrayList<String> rolesID){
+
+    public Command(GuildManager democracy, Config config, String command, ArrayList<String> args, ArrayList<String> usersID, ArrayList<String> rolesID) {
         this.config = config;
         this.e = null;
         this.command = command;
@@ -94,6 +94,12 @@ public class Command {
             case "shroles":
                 shroles();
                 break;
+            case "vote":
+                vote();
+                break;
+            case "end":
+                end();
+                break;
             default:
                 say("You can only do these commands :");
                 listCommands();
@@ -142,8 +148,12 @@ public class Command {
     }
 
     private void say(String sentence) {
+        try {
         if (!("".equals(sentence))) {
             e.getChannel().sendMessage(sentence);
+        }
+        } catch (NullPointerException e){
+            democracy.getGuild().getPublicChannel().sendMessage(sentence);
         }
     }
 
@@ -325,11 +335,11 @@ public class Command {
     public String getRolesString() {
         String string = "";
         for (Role role : roles) {
-            string += "@"+role.getName();
+            string += "@" + role.getName();
         }
         return string;
     }
-    
+
     public String getRolesasMention() {
         String string = "";
         for (Role role : roles) {
@@ -341,8 +351,47 @@ public class Command {
     private void shroles() {
         String string = "Roles :\n";
         for (Role role : democracy.getGuild().getRoles()) {
-            string += "\n" + role.getAsMention() + " : " +role.getId();
+            string += "\n" + role.getAsMention() + " : " + role.getId();
         }
         say(string);
+    }
+
+    private void vote() {
+        if (args.size() == 2) {
+            try {
+              Votation votation = config.getVotations().get(Integer.parseInt(args.get(0)));
+              switch(args.get(1).toLowerCase()){
+                  case "for":
+                      votation.voteFor(author);
+                      break;
+                  case "against":
+                      votation.voteAgainst(author);
+                      break;
+                  default :
+                      say("What do you mean you are \""+args.get(1)+"\" this votation ?");
+              }
+            } catch (NumberFormatException | IndexOutOfBoundsException ex) {
+                say("There is no votation with this ID");
+            }
+        }
+    }
+
+    private void end() {
+        try {
+              Votation votation = config.getVotations().get(Integer.parseInt(args.get(0)));
+              int against = votation.getVoteAgainst();
+              int fors = votation.getVoteFor();
+              say("There is "+fors+" votes for and "+ against + " votes against");            
+              if(votation.getResult()){
+                  say("The referednum is accepted !");
+              } else {
+                  say("The referendum is refused !");
+              }
+              config.getReferendums().remove(votation.getSubject().getAuthor());
+              config.getVotations().remove(votation);
+              votation.endVote();
+            } catch (NumberFormatException | IndexOutOfBoundsException ex) {
+                say("There is no votation with this ID");
+            }
     }
 }

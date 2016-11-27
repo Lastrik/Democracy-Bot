@@ -19,14 +19,13 @@ public class Votation {
     private int voteFor;
     private int voteAgainst;
     private ChannelManager votations;
-    private String subject;
+    private Referendum subject;
 
-    public Votation(String subject, GuildManager democracy) {
+    public Votation(Referendum subject, GuildManager democracy) {
         voteFor = 0;
         voteAgainst = 0;
-        democracy.getGuild().getPublicChannel().sendMessage("A new votation has begun. Please go and vote in the votation channel. If you vote in this channel, your votes will not be accounted.");
-        democracy.getGuild().getPublicChannel().sendMessage("The subject of the vote is : " + subject);
         haveVoted = new ArrayList<>();
+        this.subject = subject;
     }
 
     public boolean voteFor(User user) {
@@ -58,7 +57,10 @@ public class Votation {
     }
     
     public void endVote() {
-    
+        if(getResult())
+            for (Command command : subject.getCommands()) {
+                command.process();
+            }
     }
 
     public int getVoteFor() {
@@ -73,7 +75,8 @@ public class Votation {
         return votations;
     }
 
-    public String getSubject() {
+    public Referendum getSubject() {
         return subject;
     }
+
 }

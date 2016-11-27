@@ -17,10 +17,12 @@ public class Config implements Serializable{
     
    private HashMap<String, ArrayList<String>> authorization ;
    private HashMap<String, Referendum> referendums;
+   private ArrayList<Votation> votations;
 
     public Config() {
         this.authorization = new HashMap<>();
         this.referendums = new HashMap<>();
+        this.votations = new ArrayList<>();
     }
 
     public HashMap<String, ArrayList<String>> getAuthorization() {
@@ -34,4 +36,9 @@ public class Config implements Serializable{
     public HashMap<String, Referendum> getReferendums() {
         return referendums;
     }
+
+    public ArrayList<Votation> getVotations() {
+        return votations;
+    }
+
 }
