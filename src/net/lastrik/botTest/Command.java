@@ -393,11 +393,20 @@ public class Command {
               } else {
                   say("The referendum is refused !");
               }
-              config.getReferendums().remove(votation.getSubject().getAuthor().getId());
               config.getVotations().remove(Integer.parseInt(args.get(0)));
+              config.getUsersNoReferendums().remove(votation.getSubject().getAuthor().getId());
               votation.endVote();
             } catch (NumberFormatException | IndexOutOfBoundsException ex) {
                 say("There is no votation with this ID");
             }
     }
+
+    public ArrayList<User> getUsers() {
+        return users;
+    }
+
+    public ArrayList<Role> getRoles() {
+        return roles;
+    }
+    
 }

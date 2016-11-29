@@ -19,15 +19,23 @@ public class Votation implements Serializable{
     private ArrayList<User> haveVoted;
     private int voteFor;
     private int voteAgainst;
-    private ChannelManager votations;
     private Referendum subject;
 
-    public Votation(Referendum subject, GuildManager democracy) {
+    public Votation(Referendum subject) {
         voteFor = 0;
         voteAgainst = 0;
         haveVoted = new ArrayList<>();
         this.subject = subject;
     }
+
+    public Votation(ArrayList<User> haveVoted, int voteFor, int voteAgainst, Referendum subject) {
+        this.haveVoted = haveVoted;
+        this.voteFor = voteFor;
+        this.voteAgainst = voteAgainst;
+        this.subject = subject;
+    }
+    
+   
 
     public boolean voteFor(User user) {
         boolean result = false;
@@ -72,12 +80,11 @@ public class Votation implements Serializable{
         return voteAgainst;
     }
 
-    public ChannelManager getChan() {
-        return votations;
-    }
-
     public Referendum getSubject() {
         return subject;
     }
 
+    public ArrayList<User> getHaveVoted() {
+        return haveVoted;
+    }
 }

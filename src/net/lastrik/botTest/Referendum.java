@@ -15,7 +15,7 @@ import net.dv8tion.jda.managers.GuildManager;
  *
  * @author Jordan
  */
-public class Referendum implements Serializable{
+public class Referendum implements Serializable {
 
     private ArrayList<Command> commands;
     private User author;
@@ -32,6 +32,14 @@ public class Referendum implements Serializable{
         this.config = config;
     }
 
+    public Referendum(Config config, String author) {
+        this.p = null;
+        this.commands = new ArrayList<>();
+        this.author = democracy.getGuild().getUserById(author);
+        this.democracy = democracy;
+        this.config = config;
+    }
+
     public void process() {
         sayMP("New referendum created, type the commands you want to do on \"" + democracy.getGuild().getName() + "\"");
         listCommands();
@@ -41,9 +49,9 @@ public class Referendum implements Serializable{
 
     private void refCommand(String command, ArrayList<String> args, ArrayList<String> usersID, ArrayList<String> rolesID) {
         Command commandC = new Command(democracy, config, command, args, usersID, rolesID);
-        if(commandC.check()){
+        if (commandC.check()) {
             commands.add(commandC);
-        }else {
+        } else {
             refSpeCommand(command, args);
         }
     }
@@ -82,11 +90,11 @@ public class Referendum implements Serializable{
     }
 
     private void refSpeCommand(String command, ArrayList<String> args) {
-        switch(command){
+        switch (command) {
             case "check":
                 check();
                 break;
-            case "initiate" :
+            case "initiate":
                 initiate();
                 break;
         }
@@ -101,12 +109,13 @@ public class Referendum implements Serializable{
     }
 
     private void initiate() {
-                Votation votation = new Votation(this, democracy);
-        String string = "New referendum created on ID "+config.addVotation(votation)+" :\n";
+        Votation votation = new Votation(this);
+        String string = "New referendum created on ID " + config.addVotation(votation) + " :\n";
         for (Command command : commands) {
             string += "\n" + command.getCommand() + " " + command.getArgsString() + command.getRolesasMention() + " " + command.getUsersByMention();
         }
         sayGuild(string);
+        config.getReferendums().remove(author.getId());
     }
 
     public User getAuthor() {
@@ -116,5 +125,8 @@ public class Referendum implements Serializable{
     public ArrayList<Command> getCommands() {
         return commands;
     }
-    
+
+    public void say(String sentence) {
+        p.getChannel().sendMessage(sentence);
+    }
 }

@@ -165,9 +165,9 @@ public class Bot implements EventListener {
 //        voteChan.delete();
 //        return result;
 //    }
-
     public void save() {
         try {
+            config.serialize(democracy);
             FileOutputStream fos = new FileOutputStream(savePath);
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(config);
@@ -187,6 +187,7 @@ public class Bot implements EventListener {
             config = (Config) ois.readObject();
             ois.close();
             fis.close();
+            config.unserialize(democracy);
             System.out.println("Save file loaded");
         } catch (IOException ioe) {
             System.out.println("No save file found");
