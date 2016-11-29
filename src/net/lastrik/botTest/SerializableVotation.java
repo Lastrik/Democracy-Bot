@@ -5,6 +5,7 @@
  */
 package net.lastrik.botTest;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import net.dv8tion.jda.entities.User;
@@ -14,7 +15,7 @@ import net.dv8tion.jda.managers.GuildManager;
  *
  * @author Jordan
  */
-public class SerializableVotation {
+public class SerializableVotation implements Serializable{
 
     private int id;
     private ArrayList<String> haveVoted;
@@ -41,7 +42,7 @@ public class SerializableVotation {
     }
 
     public Votation unserialize(Config config, GuildManager democracy) {
-        Referendum referendum = new Referendum(config, author);
+        Referendum referendum = new Referendum(config, author, democracy);
         for (String command : commands) {
             ArrayList<String> splittedCommand = new ArrayList<>(Arrays.asList(command.split(" ")));
             String commandNoArgs = splittedCommand.get(0);

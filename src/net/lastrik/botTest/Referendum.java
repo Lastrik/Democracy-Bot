@@ -32,11 +32,11 @@ public class Referendum implements Serializable {
         this.config = config;
     }
 
-    public Referendum(Config config, String author) {
+    public Referendum(Config config, String author, GuildManager democracy) {
         this.p = null;
         this.commands = new ArrayList<>();
-        this.author = democracy.getGuild().getUserById(author);
         this.democracy = democracy;
+        this.author = democracy.getGuild().getUserById(author);    
         this.config = config;
     }
 
