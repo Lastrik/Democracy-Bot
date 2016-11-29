@@ -152,7 +152,7 @@ public class Command {
         if (!("".equals(sentence))) {
             e.getChannel().sendMessage(sentence);
         }
-        } catch (NullPointerException e){
+        } catch (NullPointerException ex){
             democracy.getGuild().getPublicChannel().sendMessage(sentence);
         }
     }
@@ -359,6 +359,7 @@ public class Command {
     private void vote() {
         if (args.size() == 2) {
             try {
+               if(config.getVotations().containsKey(Integer.parseInt(args.get(0)))){
               Votation votation = config.getVotations().get(Integer.parseInt(args.get(0)));
               switch(args.get(1).toLowerCase()){
                   case "for":
@@ -370,9 +371,14 @@ public class Command {
                   default :
                       say("What do you mean you are \""+args.get(1)+"\" this votation ?");
               }
-            } catch (NumberFormatException | IndexOutOfBoundsException ex) {
-                say("There is no votation with this ID");
+               } else {
+                   say("This ID doesn't exist");
+               }
+            } catch (NumberFormatException ex) {
+                say("The ID must be a number");
             }
+        } else {
+            say("The command must contain the ID of the Referendum and your vote (\"for\" or \"against\")");
         }
     }
 
@@ -387,8 +393,8 @@ public class Command {
               } else {
                   say("The referendum is refused !");
               }
-              config.getReferendums().remove(votation.getSubject().getAuthor());
-              config.getVotations().remove(votation);
+              config.getReferendums().remove(votation.getSubject().getAuthor().getId());
+              config.getVotations().remove(Integer.parseInt(args.get(0)));
               votation.endVote();
             } catch (NumberFormatException | IndexOutOfBoundsException ex) {
                 say("There is no votation with this ID");

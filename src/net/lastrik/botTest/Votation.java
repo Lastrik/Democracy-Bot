@@ -1,5 +1,6 @@
 package net.lastrik.botTest;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import net.dv8tion.jda.entities.User;
 import net.dv8tion.jda.managers.ChannelManager;
@@ -10,7 +11,7 @@ import java.util.*;
  *
  * @author Lastrik
  */
-public class Votation {
+public class Votation implements Serializable{
 
     public final static int PERCENTAGE_FOR_YES = 50;
     public final static int VOTES_MIN = 2;

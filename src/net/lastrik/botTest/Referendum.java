@@ -5,6 +5,7 @@
  */
 package net.lastrik.botTest;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import net.dv8tion.jda.entities.User;
 import net.dv8tion.jda.events.message.priv.PrivateMessageReceivedEvent;
@@ -14,7 +15,7 @@ import net.dv8tion.jda.managers.GuildManager;
  *
  * @author Jordan
  */
-public class Referendum {
+public class Referendum implements Serializable{
 
     private ArrayList<Command> commands;
     private User author;
@@ -101,8 +102,7 @@ public class Referendum {
 
     private void initiate() {
                 Votation votation = new Votation(this, democracy);
-                config.getVotations().add(votation);
-        String string = "New referendum created on ID "+config.getVotations().indexOf(votation)+" :\n";
+        String string = "New referendum created on ID "+config.addVotation(votation)+" :\n";
         for (Command command : commands) {
             string += "\n" + command.getCommand() + " " + command.getArgsString() + command.getRolesasMention() + " " + command.getUsersByMention();
         }
