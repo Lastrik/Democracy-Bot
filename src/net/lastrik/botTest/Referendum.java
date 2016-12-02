@@ -6,6 +6,10 @@
 package net.lastrik.botTest;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 import net.dv8tion.jda.entities.User;
 import net.dv8tion.jda.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.managers.GuildManager;
@@ -22,6 +26,7 @@ public class Referendum {
     private GuildManager democracy;
     private ArrayList<String> commandsText;
     private Config config;
+    private final static int DAYS_TO_VOTE = 2;
 
     public Referendum(Config config, PrivateMessageReceivedEvent p, GuildManager democracy) {
         this.p = p;
@@ -32,17 +37,29 @@ public class Referendum {
     }
 
     public void process() {
-        sayMP("New referendum created, type the commands you want to do on \"" + democracy.getGuild().getName() + "\"");
+        sayMP("New referendum created, type the commands you want to do on \"" + democracy.getGuild().getName() + "\".");
         listCommands();
         listRefSpecialCommands();
         sayMP("To refer to users, use @userID and to refer to roles, use #roleID");
+        
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        cal.add(Calendar.DAY_OF_YEAR, DAYS_TO_VOTE);
+        Date time = cal.getTime();
+        Timer timerUntilEnd = new Timer();
+        TimerTask taskEndRef = new TimerTask() {
+            @Override
+            public void run() {
+                
+            }
+        };
     }
 
     private void refCommand(String command, ArrayList<String> args, ArrayList<String> usersID, ArrayList<String> rolesID) {
         Command commandC = new Command(democracy, config, command, args, usersID, rolesID);
-        if(commandC.check()){
+        if (commandC.check()) {
             commands.add(commandC);
-        }else {
+        } else {
             refSpeCommand(command, args);
         }
     }
@@ -81,11 +98,11 @@ public class Referendum {
     }
 
     private void refSpeCommand(String command, ArrayList<String> args) {
-        switch(command){
+        switch (command) {
             case "check":
                 check();
                 break;
-            case "initiate" :
+            case "initiate":
                 initiate();
                 break;
         }
@@ -105,5 +122,11 @@ public class Referendum {
             string += "\n" + command.getCommand() + " " + command.getArgsString() + command.getRolesasMention() + " " + command.getUsersByMention();
         }
         sayGuild(string);
+    }
+    
+    private boolean end() {
+        boolean result = false;
+        
+        return result;
     }
 }
