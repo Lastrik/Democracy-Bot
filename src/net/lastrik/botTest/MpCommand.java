@@ -6,6 +6,10 @@
 package net.lastrik.botTest;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 import net.dv8tion.jda.entities.Guild;
 import net.dv8tion.jda.entities.Role;
 import net.dv8tion.jda.entities.User;
@@ -18,6 +22,7 @@ import net.dv8tion.jda.managers.GuildManager;
  * @author Jordan
  */
 class MpCommand {
+
     private GuildManager democracy;
     private PrivateMessageReceivedEvent p;
     private String command;
@@ -25,6 +30,7 @@ class MpCommand {
     private ArrayList<User> users;
     private User author;
     private Config config;
+    private final static int DAYS_TO_VOTE = 2;
 
     public MpCommand(GuildManager democracy, PrivateMessageReceivedEvent p, String command, ArrayList<String> args, Config config) {
         this.democracy = democracy;
@@ -37,21 +43,21 @@ class MpCommand {
     }
 
     public void process() {
-        if(config.getReferendums().containsKey(author.getId())){
+        if (config.getReferendums().containsKey(author.getId())) {
             config.getReferendums().get(author.getId()).refCommand(command, args);
-        }else {
-        switch (command) {
-            case "ping":
-                sayMP("pong");
-                break;
-            case "referendum":
-                referendum();
-                break;
-            default:
-                sayMP("You can only do these commands :");
-                listCommands();
+        } else {
+            switch (command) {
+                case "ping":
+                    sayMP("pong");
+                    break;
+                case "referendum":
+                    referendum();
+                    break;
+                default:
+                    sayMP("You can only do these commands :");
+                    listCommands();
+            }
         }
-    }
     }
 
     private void sayMP(String sentence) {

@@ -97,8 +97,8 @@ public class Command {
             case "vote":
                 vote();
                 break;
-            case "end":
-                end();
+            case "changedaystovote":
+                changeDaysToVote();
                 break;
             default:
                 say("You can only do these commands :");
@@ -356,6 +356,11 @@ public class Command {
         say(string);
     }
 
+    private void changeDaysToVote() {
+        int days = new Integer(args.get(0));
+        Referendum.daysToVote = days;
+    }
+    
     private void vote() {
         if (args.size() == 2) {
             try {
@@ -380,25 +385,6 @@ public class Command {
         } else {
             say("The command must contain the ID of the Referendum and your vote (\"for\" or \"against\")");
         }
-    }
-
-    private void end() {
-        try {
-              Votation votation = config.getVotations().get(Integer.parseInt(args.get(0)));
-              int against = votation.getVoteAgainst();
-              int fors = votation.getVoteFor();
-              say("There is "+fors+" votes for and "+ against + " votes against");            
-              if(votation.getResult()){
-                  say("The referednum is accepted !");
-              } else {
-                  say("The referendum is refused !");
-              }
-              config.getVotations().remove(Integer.parseInt(args.get(0)));
-              config.getUsersNoReferendums().remove(votation.getSubject().getAuthor().getId());
-              votation.endVote();
-            } catch (NumberFormatException | IndexOutOfBoundsException ex) {
-                say("There is no votation with this ID");
-            }
     }
 
     public ArrayList<User> getUsers() {
