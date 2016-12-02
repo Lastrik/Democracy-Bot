@@ -27,7 +27,8 @@ public class Referendum implements Serializable {
     private GuildManager democracy;
     private ArrayList<String> commandsText;
     private Config config;
-    private final static int DAYS_TO_VOTE = 2;
+    private final static int DAYS_TO_VOTE = 10;
+    private Votation votation;
 
     public Referendum(Config config, PrivateMessageReceivedEvent p, GuildManager democracy) {
         this.p = p;
@@ -41,7 +42,7 @@ public class Referendum implements Serializable {
         this.p = null;
         this.commands = new ArrayList<>();
         this.democracy = democracy;
-        this.author = democracy.getGuild().getUserById(author);    
+        this.author = democracy.getGuild().getUserById(author);
         this.config = config;
     }
 
@@ -50,18 +51,6 @@ public class Referendum implements Serializable {
         listCommands();
         listRefSpecialCommands();
         sayMP("To refer to users, use @userID and to refer to roles, use #roleID");
-        
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(new Date());
-        cal.add(Calendar.DAY_OF_YEAR, DAYS_TO_VOTE);
-        Date time = cal.getTime();
-        Timer timerUntilEnd = new Timer();
-        TimerTask taskEndRef = new TimerTask() {
-            @Override
-            public void run() {
-                
-            }
-        };
     }
 
     private void refCommand(String command, ArrayList<String> args, ArrayList<String> usersID, ArrayList<String> rolesID) {
@@ -126,13 +115,27 @@ public class Referendum implements Serializable {
     }
 
     private void initiate() {
-        Votation votation = new Votation(this);
+        votation = new Votation(this);
         String string = "New referendum created on ID " + config.addVotation(votation) + " :\n";
         for (Command command : commands) {
             string += "\n" + command.getCommand() + " " + command.getArgsString() + command.getRolesasMention() + " " + command.getUsersByMention();
         }
         sayGuild(string);
         config.getReferendums().remove(author.getId());
+
+        //Start the timer to end the vote later
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        cal.add(Calendar.SECOND, DAYS_TO_VOTE);
+        Date time = cal.getTime();
+        Timer timerUntilEnd = new Timer();
+        TimerTask taskEndRef = new TimerTask() {
+            @Override
+            public void run() {
+                end();
+            }
+        };
+        timerUntilEnd.schedule(taskEndRef, time);
     }
 
     public User getAuthor() {
@@ -146,10 +149,34 @@ public class Referendum implements Serializable {
     public void say(String sentence) {
         p.getChannel().sendMessage(sentence);
     }
-    
-    private boolean end() {
-        boolean result = false;
-        
-        return result;
+
+    private void end() {
+        try {
+            int against = votation.getVoteAgainst();
+            int fors = votation.getVoteFor();
+            int votationID = -1;
+            for (Integer votationConfigID : config.getVotations().keySet()) {
+                Votation votationConfig = config.getVotations().get(votationConfigID);
+                if (votation == votationConfig) {
+                    votationID = votationConfigID;
+                    break;
+                }
+            }
+            if (votationID == -1) {
+                throw new InternalError();
+            }
+            sayGuild("This is the end of votation " + votationID);
+            sayGuild("There is " + fors + " votes for and " + against + " votes against");
+            if (votation.getResult()) {
+                sayGuild("The referendum is accepted !");
+            } else {
+                sayGuild("The referendum is refused !");
+            }            
+            config.getVotations().remove(votationID);
+            config.getUsersNoReferendums().remove(votation.getSubject().getAuthor().getId());
+            votation.endVote();
+        } catch (NumberFormatException | IndexOutOfBoundsException ex) {
+            say("There is no votation with this ID");
+        }
     }
 }
