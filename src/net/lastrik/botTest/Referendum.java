@@ -5,6 +5,7 @@
  */
 package net.lastrik.botTest;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -18,7 +19,7 @@ import net.dv8tion.jda.managers.GuildManager;
  *
  * @author Jordan
  */
-public class Referendum {
+public class Referendum implements Serializable {
 
     private ArrayList<Command> commands;
     private User author;
@@ -33,6 +34,14 @@ public class Referendum {
         this.commands = new ArrayList<>();
         this.author = p.getAuthor();
         this.democracy = democracy;
+        this.config = config;
+    }
+
+    public Referendum(Config config, String author, GuildManager democracy) {
+        this.p = null;
+        this.commands = new ArrayList<>();
+        this.democracy = democracy;
+        this.author = democracy.getGuild().getUserById(author);    
         this.config = config;
     }
 
@@ -117,11 +126,25 @@ public class Referendum {
     }
 
     private void initiate() {
-        String string = "New referendum created :\n";
+        Votation votation = new Votation(this);
+        String string = "New referendum created on ID " + config.addVotation(votation) + " :\n";
         for (Command command : commands) {
             string += "\n" + command.getCommand() + " " + command.getArgsString() + command.getRolesasMention() + " " + command.getUsersByMention();
         }
         sayGuild(string);
+        config.getReferendums().remove(author.getId());
+    }
+
+    public User getAuthor() {
+        return author;
+    }
+
+    public ArrayList<Command> getCommands() {
+        return commands;
+    }
+
+    public void say(String sentence) {
+        p.getChannel().sendMessage(sentence);
     }
     
     private boolean end() {

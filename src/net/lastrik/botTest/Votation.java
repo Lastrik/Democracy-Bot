@@ -1,5 +1,6 @@
 package net.lastrik.botTest;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import net.dv8tion.jda.entities.User;
 import net.dv8tion.jda.managers.ChannelManager;
@@ -10,7 +11,7 @@ import java.util.*;
  *
  * @author Lastrik
  */
-public class Votation {
+public class Votation implements Serializable{
 
     public final static int PERCENTAGE_FOR_YES = 50;
     public final static int VOTES_MIN = 2;
@@ -18,16 +19,23 @@ public class Votation {
     private ArrayList<User> haveVoted;
     private int voteFor;
     private int voteAgainst;
-    private ChannelManager votations;
-    private String subject;
+    private Referendum subject;
 
-    public Votation(String subject, GuildManager democracy) {
+    public Votation(Referendum subject) {
         voteFor = 0;
         voteAgainst = 0;
-        democracy.getGuild().getPublicChannel().sendMessage("A new votation has begun. Please go and vote in the votation channel. If you vote in this channel, your votes will not be accounted.");
-        democracy.getGuild().getPublicChannel().sendMessage("The subject of the vote is : " + subject);
         haveVoted = new ArrayList<>();
+        this.subject = subject;
     }
+
+    public Votation(ArrayList<User> haveVoted, int voteFor, int voteAgainst, Referendum subject) {
+        this.haveVoted = haveVoted;
+        this.voteFor = voteFor;
+        this.voteAgainst = voteAgainst;
+        this.subject = subject;
+    }
+    
+   
 
     public boolean voteFor(User user) {
         boolean result = false;
@@ -58,7 +66,10 @@ public class Votation {
     }
     
     public void endVote() {
-    
+        if(getResult())
+            for (Command command : subject.getCommands()) {
+                command.process();
+            }
     }
 
     public int getVoteFor() {
@@ -69,11 +80,11 @@ public class Votation {
         return voteAgainst;
     }
 
-    public ChannelManager getChan() {
-        return votations;
+    public Referendum getSubject() {
+        return subject;
     }
 
-    public String getSubject() {
-        return subject;
+    public ArrayList<User> getHaveVoted() {
+        return haveVoted;
     }
 }

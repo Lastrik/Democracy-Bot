@@ -67,6 +67,7 @@ class MpCommand {
     private void referendum() {
         Referendum referendum = new Referendum(config, p, democracy);
         config.getReferendums().put(author.getId(), referendum);
+        config.getUsersNoReferendums().put(author.getId(), System.currentTimeMillis());
         referendum.process();
     }
 

@@ -141,33 +141,33 @@ public class Bot implements EventListener {
     }
 
 //J'ai pas touché à ces trucs, tu en fait ce que tu veux
-    public void startVotation(String name) {
-        Votation vote = new Votation(name, democracy);
-        votations.add(vote);
-        TimerTask taskEndVote = new TimerTask() {
-            @Override
-            public void run() {
-                endVote(vote);
-            }
-        };
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(new Date());
-        cal.add(Calendar.DAY_OF_YEAR, DAYS_TO_VOTE);
-        Date time = cal.getTime();
-        Timer timerUntilEnd = new Timer();
-        timerUntilEnd.schedule(taskEndVote, time);
-    }
-
-    public boolean endVote(Votation votation) {
-        democracy.getGuild().getPublicChannel().sendMessage("The votation has ended.");
-        ChannelManager voteChan = votation.getChan();
-        boolean result = votation.getResult();
-        voteChan.delete();
-        return result;
-    }
-
+//    public void startVotation(String name) {
+//        Votation vote = new Votation(name, democracy);
+//        votations.add(vote);
+//        TimerTask taskEndVote = new TimerTask() {
+//            @Override
+//            public void run() {
+//                endVote(vote);
+//            }
+//        };
+//        Calendar cal = Calendar.getInstance();
+//        cal.setTime(new Date());
+//        cal.add(Calendar.DAY_OF_YEAR, DAYS_TO_VOTE);
+//        Date time = cal.getTime();
+//        Timer timerUntilEnd = new Timer();
+//        timerUntilEnd.schedule(taskEndVote, time);
+//    }
+//
+//    public boolean endVote(Votation votation) {
+//        democracy.getGuild().getPublicChannel().sendMessage("The votation has ended.");
+//        ChannelManager voteChan = votation.getChan();
+//        boolean result = votation.getResult();
+//        voteChan.delete();
+//        return result;
+//    }
     public void save() {
         try {
+            config.serialize(democracy);
             FileOutputStream fos = new FileOutputStream(savePath);
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(config);
@@ -184,9 +184,10 @@ public class Bot implements EventListener {
             System.out.println("Charging save file");
             FileInputStream fis = new FileInputStream(savePath);
             ObjectInputStream ois = new ObjectInputStream(fis);
-            config =  (Config) ois.readObject();
+            config = (Config) ois.readObject();
             ois.close();
             fis.close();
+            config.unserialize(democracy);
             System.out.println("Save file loaded");
         } catch (IOException ioe) {
             System.out.println("No save file found");
