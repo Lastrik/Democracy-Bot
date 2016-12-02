@@ -97,6 +97,9 @@ public class Command {
             case "vote":
                 vote();
                 break;
+            case "changedaystovote":
+                changeDaysToVote();
+                break;
             default:
                 say("You can only do these commands :");
                 listCommands();
@@ -353,6 +356,11 @@ public class Command {
         say(string);
     }
 
+    private void changeDaysToVote() {
+        int days = new Integer(args.get(0));
+        Referendum.daysToVote = days;
+    }
+    
     private void vote() {
         if (args.size() == 2) {
             try {
