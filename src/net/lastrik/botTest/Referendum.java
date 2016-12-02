@@ -27,7 +27,7 @@ public class Referendum implements Serializable {
     private GuildManager democracy;
     private ArrayList<String> commandsText;
     private Config config;
-    private final static int DAYS_TO_VOTE = 10;
+    public static int daysToVote = 2;
     private Votation votation;
 
     public Referendum(Config config, PrivateMessageReceivedEvent p, GuildManager democracy) {
@@ -126,7 +126,7 @@ public class Referendum implements Serializable {
         //Start the timer to end the vote later
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
-        cal.add(Calendar.SECOND, DAYS_TO_VOTE);
+        cal.add(Calendar.DAY_OF_YEAR, daysToVote);
         Date time = cal.getTime();
         Timer timerUntilEnd = new Timer();
         TimerTask taskEndRef = new TimerTask() {
