@@ -15,7 +15,7 @@ import net.dv8tion.jda.managers.RoleManager;
  * @author Jordan
  */
 public class Command {
-
+    
     private Config config;
     private MessageReceivedEvent e;
     private String command;
@@ -24,7 +24,11 @@ public class Command {
     private ArrayList<User> users;
     private ArrayList<Role> roles;
     private User author;
-
+    
+    public Command() {
+        
+    }
+    
     public Command(Config config, MessageReceivedEvent e, String command, ArrayList<String> args) {
         this.config = config;
         this.e = e;
@@ -35,7 +39,7 @@ public class Command {
         this.roles = new ArrayList<>(e.getMessage().getMentionedRoles());
         this.author = e.getAuthor();
     }
-
+    
     public Command(GuildManager democracy, Config config, String command, ArrayList<String> args, ArrayList<String> usersID, ArrayList<String> rolesID) {
         this.config = config;
         this.e = null;
@@ -52,7 +56,7 @@ public class Command {
         }
         this.author = null;
     }
-
+    
     public void process() {
         switch (command) {
             case "say":
@@ -100,13 +104,27 @@ public class Command {
             case "changedaystovote":
                 changeDaysToVote();
                 break;
+            case "help":
+                help();
+                break;
+            case "changetoken":
+                changeToken();
+                break;
+            case "killvotes":
+                killvotes();
+                break;            
+            case "confbase":
+                confBase();
+                break;
+            case "info":
+                info();
+                break;
             default:
-                say("You can only do these commands :");
-                listCommands();
+                say("You can only do these commands :\n\n" + listCommands());
         }
-
+        
     }
-
+    
     public boolean check() {
         Pattern p;
         boolean res = false;
@@ -146,41 +164,37 @@ public class Command {
         }
         return res;
     }
-
+    
     private void say(String sentence) {
         try {
-        if (!("".equals(sentence))) {
-            e.getChannel().sendMessage(sentence);
-        }
-        } catch (NullPointerException ex){
+            if (!("".equals(sentence))) {
+                e.getChannel().sendMessage(sentence);
+            }
+        } catch (NullPointerException ex) {
             democracy.getGuild().getPublicChannel().sendMessage(sentence);
         }
     }
-
+    
     private void ban() {
         for (User user : users) {
-            if (verifieRole(user, "Judge")) {
-                say("You can't ban judges");
-            } else {
-                say("User " + user.getAsMention() + " has been banned.");
+            say("User " + user.getAsMention() + " has been banned.");
+            if (e != null) {
                 user.getPrivateChannel().sendMessage("Hello, you have been banned from " + democracy.getGuild().getName() + ". You can send a Private message to " + e.getAuthor().getAsMention() + " who banned you in order to know why you were banned and what you can do to get unbanned. Have a nice day :)");
-                democracy.ban(user, 1);
-            }
-        }
-
-    }
-
-    private void unban() {
-        for (User user : users) {
-            if (!(democracy.getBans().contains(user))) {
-                say(user.getAsMention() + " is not banned");
             } else {
-                say("User " + user.getAsMention() + " has been unbanned.");
-                democracy.unBan(user);
+                user.getPrivateChannel().sendMessage("Hello, you have been banned from " + democracy.getGuild().getName() + ". That ban was voted by the members.");
             }
+            democracy.ban(user, 1);
+        }
+        
+    }
+    
+    private void unban() {
+        for (String userID : args) {
+            say("The user " + userID + " has been unbanned");
+            democracy.unBan(userID);
         }
     }
-
+    
     private void newTextChannel() {
         String channelName = argsAsString();
         if (check()) {
@@ -190,7 +204,7 @@ public class Command {
             say("Your name cannot contain non-aplhanumerical characacters.");
         }
     }
-
+    
     private void role() {
         for (Role role : roles) {
             for (User user : users) {
@@ -200,19 +214,19 @@ public class Command {
         }
         democracy.update();
     }
-
+    
     private void unrole() {
         for (Role role : roles) {
-
+            
             for (User user : users) {
                 democracy.removeRoleFromUser(user, role);
                 say(user.getAsMention() + " is no longer a " + role.getAsMention());
             }
-
+            
         }
         democracy.update();
     }
-
+    
     private void createRole() {
         RoleManager manager = democracy.getGuild().createRole();
         String name = argsAsString();
@@ -231,7 +245,7 @@ public class Command {
         democracy.update();
         say("The role " + manager.getRole().getAsMention() + " has been created");
     }
-
+    
     private void deleteRole() {
         for (Role role : roles) {
             say("The role " + role.getAsMention() + " has been deleted");
@@ -239,11 +253,12 @@ public class Command {
         }
         democracy.update();
     }
-
-    public String changeToken() {
-        return argsAsString();
+    
+    public void changeToken() {
+        say("The token is now " + argsAsString());
+        config.setTokenCommand(argsAsString());
     }
-
+    
     private String argsAsString() {
         String res = "";
         for (String arg : args) {
@@ -251,16 +266,31 @@ public class Command {
         }
         return res.replaceFirst(" ", "");
     }
-
-    private boolean verifieRole(User user, String roleString) {
-        boolean result = false;
-        return result;
+    
+    public String listCommands() {
+        String list = "```";
+        list += "say : Repeat after me\n";
+        list += "newtextchannel : create a textchannel\n";
+        list += "newvoicechannel : create a new voice channel\n";
+        list += "role : Give a role to someone\n";
+        list += "unrole : remove a role from someone\n";
+        list += "createrole create a role\n";
+        list += "deleterole : delete a role\n";
+        list += "ban : ban someone\n";
+        list += "unban : unban someone (by ID)\n";
+        list += "authorize : authorize a role to do a command\n";
+        list += "unauthorize : unauthorize a role to do a command\n";
+        list += "shconfig : show the config\n";
+        list += "shrole : Show the roles and their ID's\n";
+        list += "vote : vote for or agaist a referendum\n";
+        list += "changedaysvote : Change the time before a referendum ends\n";
+        list += "changetoken : Change the token\n";
+        list += "info : Get infos about a referendum\n";
+        list += "help : Show this\n";
+        list += "```";
+        return list;
     }
-
-    private void listCommands() {
-        say("The commands list is not available yet");
-    }
-
+    
     private void authorize() {
         ArrayList<String> rolesString = new ArrayList<>();
         for (Role role : roles) {
@@ -277,7 +307,7 @@ public class Command {
             config.getAuthorization().put(args.get(0), rolesString);
         }
     }
-
+    
     private void unauthorize() {
         if (config.getAuthorization().containsKey(args.get(0))) {
             for (Role role : roles) {
@@ -290,18 +320,29 @@ public class Command {
             say("There is no authorization for this command");
         }
     }
-
+    
     private void shconfig() {
-        String configString = "Config : \n";
+        String configString = "Authorizations :";
         for (String commandStr : config.getAuthorization().keySet()) {
             configString += "\n\nThe \"" + commandStr + "\" command can be done by :\n";
             for (String roleID : config.getAuthorization().get(commandStr)) {
                 configString += " | " + democracy.getGuild().getRoleById(roleID).getAsMention() + " | ";
             }
         }
+        
+        configString += "\n\nVotations in progress : \n\n";
+        
+        for (int votationID : config.getVotations().keySet()) {
+            configString += "ID : " + votationID;
+            for (Command command : config.getVotations().get(votationID).getSubject().getCommands()) {
+                configString += "\n\t" + command.getCommand() + " " + command.getArgsString() + " " + command.getRolesString() + " " + command.getUsersByMention();
+            }
+        }
+        configString += "\n\nNumber of days before the end of vote : " + config.getDaysToVote() + "\n";
+        configString += "\n\nToken : " + config.getTokenCommand();
         say(configString);
     }
-
+    
     private void newVoiceChannel() {
         String channelName = argsAsString();
         if (check()) {
@@ -311,11 +352,11 @@ public class Command {
             say("Your name cannot contain non-aplhanumerical characacters.");
         }
     }
-
+    
     public String getCommand() {
         return command;
     }
-
+    
     public String getArgsString() {
         String string = "";
         for (String arg : args) {
@@ -323,7 +364,7 @@ public class Command {
         }
         return string;
     }
-
+    
     public String getUsersByMention() {
         String string = "";
         for (User user : users) {
@@ -331,7 +372,7 @@ public class Command {
         }
         return string;
     }
-
+    
     public String getRolesString() {
         String string = "";
         for (Role role : roles) {
@@ -339,7 +380,7 @@ public class Command {
         }
         return string;
     }
-
+    
     public String getRolesasMention() {
         String string = "";
         for (Role role : roles) {
@@ -347,7 +388,7 @@ public class Command {
         }
         return string;
     }
-
+    
     private void shroles() {
         String string = "Roles :\n";
         for (Role role : democracy.getGuild().getRoles()) {
@@ -355,30 +396,33 @@ public class Command {
         }
         say(string);
     }
-
+    
     private void changeDaysToVote() {
         int days = new Integer(args.get(0));
-        Referendum.daysToVote = days;
+        config.setDaysToVote(days);
     }
     
     private void vote() {
         if (args.size() == 2) {
             try {
-               if(config.getVotations().containsKey(Integer.parseInt(args.get(0)))){
-              Votation votation = config.getVotations().get(Integer.parseInt(args.get(0)));
-              switch(args.get(1).toLowerCase()){
-                  case "for":
-                      votation.voteFor(author);
-                      break;
-                  case "against":
-                      votation.voteAgainst(author);
-                      break;
-                  default :
-                      say("What do you mean you are \""+args.get(1)+"\" this votation ?");
-              }
-               } else {
-                   say("This ID doesn't exist");
-               }
+                if (config.getVotations().containsKey(Integer.parseInt(args.get(0)))) {
+                    Votation votation = config.getVotations().get(Integer.parseInt(args.get(0)));
+                    switch (args.get(1).toLowerCase()) {
+                        case "for":
+                            votation.voteFor(author);
+                            say("Your vote is now counted\n There is " + votation.getVoteFor() + " for and " + votation.getVoteAgainst() + " against.");
+                            break;
+                        case "against":
+                            votation.voteAgainst(author);
+                            say("Your vote is now counted\n There is " + votation.getVoteFor() + " for and " + votation.getVoteAgainst() + " against.");
+                            
+                            break;
+                        default:
+                            say("What do you mean you are \"" + args.get(1) + "\" this votation ?");
+                    }
+                } else {
+                    say("This ID doesn't exist");
+                }
             } catch (NumberFormatException ex) {
                 say("The ID must be a number");
             }
@@ -386,13 +430,64 @@ public class Command {
             say("The command must contain the ID of the Referendum and your vote (\"for\" or \"against\")");
         }
     }
-
+    
     public ArrayList<User> getUsers() {
         return users;
     }
-
+    
     public ArrayList<Role> getRoles() {
         return roles;
+    }
+    
+    private void help() {
+        say("This is a democratic Guild.\nYou can make a referendum by sending me the command \"referendum\" and then doing some commands of the command list.\nThe referendum will be created once you did the command \"initiate\"\nYou can vote for a referendum by doing the command \"vote [ID] [for / against]\"\n If the referendum, the commands will be performed.");
+        say(listCommands());
+    }
+    
+    private void info() {
+        if (args.size() == 1) {
+            if (config.getVotations().containsKey(Integer.parseInt(args.get(0)))) {
+                String str = "The vote with the ID " + args.get(0) + " contains these commands : \n";
+                for (Command command : config.getVotations().get(Integer.parseInt(args.get(0))).getSubject().getCommands()) {
+                    str += "\n" + command.getCommand() + " " + command.getArgsString() + command.getRolesasMention() + " " + command.getUsersByMention();
+                }
+                str += "\n\n This votation end on " + config.getVotations().get(Integer.parseInt(args.get(0))).getSubject().getEnd();
+                say(str);
+            }
+        }
+    }
+    
+    public ArrayList<String> getArgs() {
+        return args;
+    }
+    
+    private void killvotes() {
+        config.killVote();
+    }
+    
+    private void confBase() {
+          ArrayList<String> list = new ArrayList<>();            
+            list.add( "newtextchannel") ;               
+            list.add( "newvoicechannel") ;              
+            list.add( "role") ;                
+            list.add( "unrole") ;              
+            list.add( "createrole") ;             
+            list.add( "deleterole") ;             
+            list.add( "ban") ;               
+            list.add( "unban") ;               
+            list.add( "authorize") ;               
+            list.add( "unauthorize") ;              
+            list.add( "changedaystovote") ;                            
+            list.add( "changetoken") ;                
+            list.add( "killvotes") ;             
+            list.add( "confbase") ;
+            ArrayList<String> rolesID = new ArrayList<>();
+            for (Role role : roles) {
+            rolesID.add(role.getId());
+        }
+            for (String string : list) {
+                config.getAuthorization().put(string, rolesID);
+            }
     }
     
 }

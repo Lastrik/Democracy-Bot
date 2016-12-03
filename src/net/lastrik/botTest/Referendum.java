@@ -6,9 +6,11 @@
 package net.lastrik.botTest;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 import net.dv8tion.jda.entities.User;
@@ -27,8 +29,8 @@ public class Referendum implements Serializable {
     private GuildManager democracy;
     private ArrayList<String> commandsText;
     private Config config;
-    public static int daysToVote = 2;
     private Votation votation;
+    Calendar cal;
 
     public Referendum(Config config, PrivateMessageReceivedEvent p, GuildManager democracy) {
         this.p = p;
@@ -38,12 +40,13 @@ public class Referendum implements Serializable {
         this.config = config;
     }
 
-    public Referendum(Config config, String author, GuildManager democracy) {
+    public Referendum(Config config, String author, GuildManager democracy, Calendar cal) {
         this.p = null;
         this.commands = new ArrayList<>();
         this.democracy = democracy;
         this.author = democracy.getGuild().getUserById(author);
         this.config = config;
+        this.cal = cal;
     }
 
     public void process() {
@@ -71,11 +74,12 @@ public class Referendum implements Serializable {
     }
 
     private void listCommands() {
-        sayMP("La liste des commandes envoyables en referendum");
+        Command command = new Command();
+        sayMP(command.listCommands());
     }
 
     private void listRefSpecialCommands() {
-        sayMP("La liste des commandes permettant de modifier le referendum (envoyer, annuler etc.)");
+        sayMP("```\ninitiate : initiate the referendum\ncheck : Check the commands\n```");
     }
 
     public void refCommand(String command, ArrayList<String> args) {
@@ -109,14 +113,14 @@ public class Referendum implements Serializable {
     private void check() {
         String string = "Your referendum's commands list : \n";
         for (Command command : commands) {
-            string += "\n" + command.getCommand() + " " + command.getArgsString() + command.getRolesString() + " " + command.getUsersByMention();
+            string += "\n" + command.getCommand() + " " + command.getArgsString() + " " + command.getRolesString() + " " + command.getUsersByMention();
         }
         sayMP(string);
     }
 
     private void initiate() {
         votation = new Votation(this);
-        String string = "New referendum created on ID " + config.addVotation(votation) + " :\n";
+        String string = "@everyone\nNew referendum created on ID " + config.addVotation(votation) + " :\n";
         for (Command command : commands) {
             string += "\n" + command.getCommand() + " " + command.getArgsString() + command.getRolesasMention() + " " + command.getUsersByMention();
         }
@@ -124,9 +128,9 @@ public class Referendum implements Serializable {
         config.getReferendums().remove(author.getId());
 
         //Start the timer to end the vote later
-        Calendar cal = Calendar.getInstance();
+        cal = Calendar.getInstance();
         cal.setTime(new Date());
-        cal.add(Calendar.DAY_OF_YEAR, daysToVote);
+        cal.add(Calendar.DAY_OF_YEAR, config.getDaysToVote());
         Date time = cal.getTime();
         Timer timerUntilEnd = new Timer();
         TimerTask taskEndRef = new TimerTask() {
@@ -150,7 +154,7 @@ public class Referendum implements Serializable {
         p.getChannel().sendMessage(sentence);
     }
 
-    private void end() {
+    public void end() {
         try {
             int against = votation.getVoteAgainst();
             int fors = votation.getVoteFor();
@@ -165,7 +169,7 @@ public class Referendum implements Serializable {
             if (votationID == -1) {
                 throw new InternalError();
             }
-            sayGuild("This is the end of votation " + votationID);
+            sayGuild("@everyone\nThis is the end of votation " + votationID);
             sayGuild("There is " + fors + " votes for and " + against + " votes against");
             if (votation.getResult()) {
                 sayGuild("The referendum is accepted !");
@@ -179,4 +183,20 @@ public class Referendum implements Serializable {
             say("There is no votation with this ID");
         }
     }
+    
+    public String getEnd(){
+        String str = new SimpleDateFormat("dd.MM.yyyy").format(cal.getTime());
+        str += " at " + new SimpleDateFormat("HH:mm:ss").format(cal.getTime());
+       return str;
+    }
+
+    public Calendar getCal() {
+        return cal;
+    }
+
+    public void setVotation(Votation votation) {
+        this.votation = votation;
+    }
+    
+    
 }

@@ -57,7 +57,6 @@ public class Votation implements Serializable{
 
     public boolean getResult() {
         boolean result = false;
-        int totalVotes = voteFor + voteAgainst;
         double percentage = (((double) voteFor) / (voteFor + voteAgainst)) * 100;
         if (percentage >= PERCENTAGE_FOR_YES) {
             result = true;
@@ -87,4 +86,5 @@ public class Votation implements Serializable{
     public ArrayList<User> getHaveVoted() {
         return haveVoted;
     }
+    
 }

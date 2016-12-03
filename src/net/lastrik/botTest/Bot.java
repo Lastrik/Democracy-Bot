@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import net.dv8tion.jda.JDA;
 import net.dv8tion.jda.JDABuilder;
@@ -31,12 +32,11 @@ public class Bot implements EventListener {
     public final static int DAYS_TO_VOTE = 2;
 
     private String savePath;
-    private String tokenCommand;
     private GuildManager democracy;
     private JDA jda;
     private boolean stop = false;
-    private ArrayList<Votation> votations;
     private Config config;
+    private long time;
 
     public Bot(String token) {
         try {
@@ -51,14 +51,21 @@ public class Bot implements EventListener {
         democracy = new GuildManager(jda.getGuilds().get(0));
         System.out.println("Connected with: " + jda.getSelfInfo().getUsername());
         int i;
-        tokenCommand = "!";
         config = new Config();
         load();
+        time = System.currentTimeMillis();
+        for (Votation votation : config.getVotations().values()) {
+            votation.getSubject().setVotation(votation);
+        }
+        for (Votation votation : config.getVotations().values()) {
+            if (votation.getSubject().getCal().getTimeInMillis() < time) {
+                votation.getSubject().end();
+            }
+        }
         System.out.println("The bot is authorized on " + (i = jda.getGuilds().size()) + " server" + (i > 1 ? "s" : ""));
         if (jda.getGuilds().size() > 1) {
             System.err.println("This bot is not made to run on more than on server per . Please create multiple applications for multiple servers");
         }
-        votations = new ArrayList<>();
         while (!stop) {
             Scanner scanner = new Scanner(System.in);
             String cmd = scanner.next();
@@ -66,15 +73,16 @@ public class Bot implements EventListener {
                 stop();
             }
         }
+
     }
 
     @Override
     public void onEvent(Event event) {
         if (event instanceof PrivateMessageReceivedEvent) {
             PrivateMessageReceivedEvent p = (PrivateMessageReceivedEvent) event;
-            if (p.getMessage().getContent().startsWith(tokenCommand)) {
+            if (p.getMessage().getContent().startsWith(config.getTokenCommand())) {
                 ArrayList<String> splittedCommand = splitter(p.getMessage().getContent());
-                String commandNoArgs = splittedCommand.get(0).replaceFirst(tokenCommand, "");
+                String commandNoArgs = splittedCommand.get(0).replaceFirst(config.getTokenCommand(), "");
                 splittedCommand.remove(0);
                 ArrayList<String> args = splittedCommand;
                 MpCommand mpCommand = new MpCommand(democracy, p, commandNoArgs, args, config);
@@ -84,20 +92,21 @@ public class Bot implements EventListener {
 
         if (event instanceof MessageReceivedEvent) {
             MessageReceivedEvent e = (MessageReceivedEvent) event;
-            if (e.getMessage().getContent().startsWith(tokenCommand) && (!e.isPrivate())) {
+            if (e.getMessage().getContent().startsWith(config.getTokenCommand()) && (!e.isPrivate())) {
                 ArrayList<String> splittedCommand = splitter(e.getMessage().getContent());
-                String commandNoArgs = splittedCommand.get(0).replaceFirst(tokenCommand, "");
+                String commandNoArgs = splittedCommand.get(0).replaceFirst(config.getTokenCommand(), "");
                 splittedCommand.remove(0);
                 ArrayList<String> args = splittedCommand;
                 if (!e.getAuthor().isBot()) {
                     if (authorized(e, commandNoArgs)) {
+                        if (System.currentTimeMillis() - time > 1000000) {
+                            silentSave();
+                            time = System.currentTimeMillis();
+                        }
                         switch (commandNoArgs) {
                             //Quelques commandes qui touchent directement au bot
                             case "stop":
                                 stop();
-                                break;
-                            case "changetoken":
-                                changeToken(e, args);
                                 break;
                             case "save":
                                 save();
@@ -117,15 +126,8 @@ public class Bot implements EventListener {
         }
         if (event instanceof GuildMemberJoinEvent) {
             User user = ((GuildMemberJoinEvent) event).getUser();
-            democracy = democracy.addRoleToUser(user, democracy.getGuild().getRolesByName("Citizen").toArray(new Role[0]));
-            democracy.update();
-            democracy.getGuild().getPublicChannel().sendMessage("bienvenue " + ((GuildMemberJoinEvent) event).getUser().getAsMention());
+            democracy.getGuild().getPublicChannel().sendMessage("Welcome " + ((GuildMemberJoinEvent) event).getUser().getAsMention());
         }
-    }
-
-    private void changeToken(MessageReceivedEvent e, ArrayList<String> args) {
-        Command command = new Command(config, e, "changetoken", args);
-        tokenCommand = command.changeToken();
     }
 
     private ArrayList<String> splitter(String args) {
@@ -181,7 +183,7 @@ public class Bot implements EventListener {
 
     public void load() {
         try {
-            System.out.println("Charging save file");
+            System.out.println("Loading save file");
             FileInputStream fis = new FileInputStream(savePath);
             ObjectInputStream ois = new ObjectInputStream(fis);
             config = (Config) ois.readObject();
@@ -219,5 +221,18 @@ public class Bot implements EventListener {
         config = new Config();
         save();
         e.getChannel().sendMessage("Config reloaded");
+    }
+
+    private void silentSave() {
+        try {
+            config.serialize(democracy);
+            FileOutputStream fos = new FileOutputStream(savePath);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(config);
+            oos.close();
+            fos.close();
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
     }
 }
