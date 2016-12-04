@@ -176,6 +176,7 @@ public class Bot implements EventListener {
             oos.close();
             fos.close();
             democracy.getGuild().getPublicChannel().sendMessage("Config saved");
+            load();
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
