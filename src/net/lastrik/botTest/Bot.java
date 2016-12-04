@@ -232,6 +232,7 @@ public class Bot implements EventListener {
             oos.writeObject(config);
             oos.close();
             fos.close();
+            load();
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }

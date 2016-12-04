@@ -11,7 +11,7 @@ import java.util.*;
  *
  * @author Lastrik
  */
-public class Votation implements Serializable{
+public class Votation implements Serializable {
 
     public final static int PERCENTAGE_FOR_YES = 50;
     public final static int VOTES_MIN = 2;
@@ -34,23 +34,23 @@ public class Votation implements Serializable{
         this.voteAgainst = voteAgainst;
         this.subject = subject;
     }
-    
-   
 
-    public boolean voteFor(User user) {
-        boolean result = false;
+    public String voteFor(User user) {
+        String result = "You already voted for this referendum\n";
         if (!haveVoted.contains(user)) {
             voteFor++;
             haveVoted.add(user);
+            result = "Your vote is now counted\n";
         }
         return result;
     }
 
-    public boolean voteAgainst(User user) {
-        boolean result = false;
+    public String voteAgainst(User user) {
+        String result = "You already voted for this referendum\n";
         if (!haveVoted.contains(user)) {
             voteAgainst++;
             haveVoted.add(user);
+            result = "Your vote is now counted\n";
         }
         return result;
     }
@@ -63,12 +63,13 @@ public class Votation implements Serializable{
         }
         return result;
     }
-    
+
     public void endVote() {
-        if(getResult())
+        if (getResult()) {
             for (Command command : subject.getCommands()) {
                 command.process();
             }
+        }
     }
 
     public int getVoteFor() {
@@ -86,5 +87,5 @@ public class Votation implements Serializable{
     public ArrayList<User> getHaveVoted() {
         return haveVoted;
     }
-    
+
 }

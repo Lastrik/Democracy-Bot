@@ -409,17 +409,15 @@ public class Command {
                     Votation votation = config.getVotations().get(Integer.parseInt(args.get(0)));
                     switch (args.get(1).toLowerCase()) {
                         case "for":
-                            votation.voteFor(author);
-                            say("Your vote is now counted\n There is " + votation.getVoteFor() + " for and " + votation.getVoteAgainst() + " against.");
+                            say(votation.voteFor(author));                          
                             break;
                         case "against":
-                            votation.voteAgainst(author);
-                            say("Your vote is now counted\n There is " + votation.getVoteFor() + " for and " + votation.getVoteAgainst() + " against.");
-                            
+                            say(votation.voteAgainst(author));
                             break;
                         default:
                             say("What do you mean you are \"" + args.get(1) + "\" this votation ?");
                     }
+                    say("There is " + votation.getVoteFor() + " for and " + votation.getVoteAgainst() + " against.");
                 } else {
                     say("This ID doesn't exist");
                 }
